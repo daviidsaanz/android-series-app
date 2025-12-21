@@ -1,4 +1,4 @@
-package com.david.seriesapp
+package com.david.seriesapp.view
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
