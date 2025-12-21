@@ -1,6 +1,10 @@
-package com.david.seriesapp.viewmodel
+package com.david.seriesapp.presentation.viewmodels
 
 import androidx.lifecycle.ViewModel
-class ViewModelList : ViewModel() {
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
+
+@HiltViewModel
+class TvSeriesViewModel @Inject constructor() : ViewModel() {
 
 }

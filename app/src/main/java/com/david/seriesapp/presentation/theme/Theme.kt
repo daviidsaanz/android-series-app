@@ -2,6 +2,21 @@ package com.david.seriesapp.theme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import com.david.seriesapp.presentation.theme.BackgroundLight
+import com.david.seriesapp.presentation.theme.BorderLight
+import com.david.seriesapp.presentation.theme.DividerLight
+import com.david.seriesapp.presentation.theme.OverlayLight
+import com.david.seriesapp.presentation.theme.SurfaceLight
+import com.david.seriesapp.presentation.theme.SurfaceVariantLight
+import com.david.seriesapp.presentation.theme.TextOnPrimary
+import com.david.seriesapp.presentation.theme.TextOnSurface
+import com.david.seriesapp.presentation.theme.TextPrimaryLight
+import com.david.seriesapp.presentation.theme.TextSecondaryLight
+import com.david.seriesapp.presentation.theme.TmdbDarkBlue
+import com.david.seriesapp.presentation.theme.TmdbError
+import com.david.seriesapp.presentation.theme.TmdbPrimary
+import com.david.seriesapp.presentation.theme.TmdbSuccess
+import com.david.seriesapp.presentation.theme.TmdbWarning
 
 private val LightColorScheme = lightColorScheme(
     primary = TmdbPrimary,

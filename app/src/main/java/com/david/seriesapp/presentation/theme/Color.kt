@@ -1,4 +1,4 @@
-package com.david.seriesapp.theme
+package com.david.seriesapp.presentation.theme
 
 import androidx.compose.ui.graphics.Color
 

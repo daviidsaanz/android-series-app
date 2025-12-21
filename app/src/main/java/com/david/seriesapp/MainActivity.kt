@@ -8,14 +8,19 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.ui.Modifier
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.david.seriesapp.presentation.navigation.Routes
+import com.david.seriesapp.presentation.screens.SeriesListScreen
+import com.david.seriesapp.presentation.viewmodels.TvSeriesViewModel
 import com.david.seriesapp.theme.SeriesAppTheme
-import com.david.seriesapp.viewmodel.ViewModelList
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-    val viewModelList = ViewModelList()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -23,15 +28,16 @@ class MainActivity : ComponentActivity() {
             val navController = rememberNavController()
 
             SeriesAppTheme {
-                Scaffold(modifier = Modifier.Companion.fillMaxSize()) { innerPadding ->
+                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     NavHost(
                         navController = navController,
-                        startDestination = Routes.Pantalla0.route,
+                        startDestination = Routes.SeriesList.route,
                         modifier = Modifier.padding(innerPadding)
-                    )
-                    {
-                        composable(Routes.Pantalla0.route) { ViewList(navController, viewModelList) }
-                        composable(Routes.Pantalla1.route) { ViewList(navController, viewModelList) }
+                    ) {
+                        composable(Routes.SeriesList.route) {
+                            val viewModel: TvSeriesViewModel = hiltViewModel()
+                            SeriesListScreen(navController, viewModel)
+                        }
                     }
                 }
             }
