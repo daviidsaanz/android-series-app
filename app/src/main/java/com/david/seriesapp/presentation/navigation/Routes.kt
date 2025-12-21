@@ -1,0 +1,5 @@
+package com.david.seriesapp.presentation.navigation
+
+sealed class Routes(val route: String) {
+    data object SeriesList : Routes("series_list")
+}
