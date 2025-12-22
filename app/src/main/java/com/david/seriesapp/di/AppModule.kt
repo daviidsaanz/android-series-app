@@ -1,6 +1,8 @@
 package com.david.seriesapp.di
 
 import com.david.seriesapp.data.remote.TvSeriesApi
+import com.david.seriesapp.data.repository.TvSeriesRepositoryImpl
+import com.david.seriesapp.domain.repository.TvSeriesRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -22,7 +24,7 @@ object AppModule {
     @Singleton
     fun provideOkHttpClient(): OkHttpClient {
         val logging = HttpLoggingInterceptor().apply {
-            level = HttpLoggingInterceptor.Level.BODY  // Para debug
+            level = HttpLoggingInterceptor.Level.BODY
         }
 
         return OkHttpClient.Builder()
@@ -54,5 +56,11 @@ object AppModule {
     @Singleton
     fun provideTvSeriesApi(retrofit: Retrofit): TvSeriesApi {
         return retrofit.create(TvSeriesApi::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideTvSeriesRepository(api: TvSeriesApi): TvSeriesRepository {
+        return TvSeriesRepositoryImpl(api)
     }
 }
