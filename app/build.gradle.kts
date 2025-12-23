@@ -91,6 +91,10 @@ dependencies {
     implementation("androidx.room:room-ktx:2.6.1")
 
     implementation("androidx.navigation:navigation-compose:2.7.5")
+
+    implementation("androidx.compose.material:material-icons-extended")
+
+
 }
 
 kapt {

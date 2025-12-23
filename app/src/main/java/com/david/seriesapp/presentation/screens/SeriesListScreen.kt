@@ -24,7 +24,9 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import com.david.seriesapp.data.remote.TvSeriesDto
 import com.david.seriesapp.presentation.components.LoadingItem
+import com.david.seriesapp.presentation.navigation.Routes
 import com.david.seriesapp.presentation.viewmodels.TvSeriesViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -85,7 +87,7 @@ fun SeriesListScreen(
             // Estado de error
             else if (uiState.error != null && uiState.series.isEmpty()) {
                 uiState.error?.let { errorMessage ->
-                    ErrorState(
+                    ListErrorState(
                         message = errorMessage,
                         onRetry = { viewModel.loadInitialSeries() }
                     )
@@ -101,11 +103,11 @@ fun SeriesListScreen(
                 ) {
                     items(uiState.series) { serie ->
                         SeriesCard(serie = serie) {
-
+                            navController.navigate(Routes.SeriesDetail.createRoute(serie.id))
                         }
                     }
 
-                    // Indicador de carga al final para paginación
+                    // Carga al final para paginación
                     if (uiState.isLoadingMore) {
                         item {
                             LoadingItem(message = "Cargando más series...")
@@ -124,9 +126,9 @@ fun SeriesListScreen(
             // Error overlay (para errores durante la paginación)
             if (uiState.error != null && uiState.series.isNotEmpty()) {
                 uiState.error?.let { errorMessage ->
-                    ErrorState(
+                    ListErrorSnackbar(
                         message = errorMessage,
-                        onRetry = { viewModel.loadInitialSeries() }
+                        onDismiss = { /* Podríamos resetear el error en el ViewModel */ }
                     )
                 }
             }
@@ -136,7 +138,7 @@ fun SeriesListScreen(
 
 @Composable
 fun SeriesCard(
-    serie: com.david.seriesapp.data.remote.TvSeriesDto,
+    serie: TvSeriesDto,
     onClick: () -> Unit
 ) {
     Card(
@@ -210,15 +212,16 @@ fun SeriesCard(
     }
 }
 
+
 @Composable
-fun ErrorState(
+fun ListErrorState(
     message: String,
     onRetry: () -> Unit
 ) {
     Column(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
+        verticalArrangement = Arrangement.Center
     ) {
         Text(
             text = "Error al cargar",
@@ -255,12 +258,12 @@ fun EndOfListMessage() {
     }
 }
 
+
 @Composable
-fun ErrorSnackbar(
+fun ListErrorSnackbar(
     message: String,
     onDismiss: () -> Unit
 ) {
-
     Box(
         modifier = Modifier
             .fillMaxWidth()
