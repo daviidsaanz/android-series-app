@@ -1,4 +1,4 @@
-package com.david.seriesapp.view
+package com.david.seriesapp
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -8,13 +8,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.ui.Modifier
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.david.seriesapp.presentation.navigation.Routes
+import com.david.seriesapp.presentation.screens.SeriesDetailScreen
 import com.david.seriesapp.presentation.screens.SeriesListScreen
-import com.david.seriesapp.presentation.viewmodels.TvSeriesViewModel
 import com.david.seriesapp.theme.SeriesAppTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -35,8 +36,20 @@ class MainActivity : ComponentActivity() {
                         modifier = Modifier.padding(innerPadding)
                     ) {
                         composable(Routes.SeriesList.route) {
-                            val viewModel: TvSeriesViewModel = hiltViewModel()
-                            SeriesListScreen(navController, viewModel)
+                            SeriesListScreen(navController = navController)
+                        }
+
+                        composable(
+                            route = Routes.SeriesDetail.route,
+                            arguments = listOf(
+                                navArgument("seriesId") {
+                                    type = NavType.IntType
+                                }
+                            )
+                        ) { backStackEntry ->
+                            SeriesDetailScreen(
+                                navController = navController
+                            )
                         }
                     }
                 }
