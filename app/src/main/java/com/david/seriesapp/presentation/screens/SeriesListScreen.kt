@@ -28,6 +28,7 @@ import com.david.seriesapp.data.remote.TvSeriesDto
 import com.david.seriesapp.presentation.components.LoadingItem
 import com.david.seriesapp.presentation.navigation.Routes
 import com.david.seriesapp.presentation.viewmodels.TvSeriesViewModel
+import androidx.compose.material.icons.filled.WifiOff
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -53,10 +54,70 @@ fun SeriesListScreen(
         }
     }
 
+    // AlertDialog para errores
+    if (uiState.error != null && !uiState.isLoading) {
+        AlertDialog(
+            onDismissRequest = { viewModel.clearError() },
+            title = {
+                Text(
+                    if (uiState.isOffline) "Modo Offline" else "Información"
+                )
+            },
+            text = {
+                Column {
+                    Text(uiState.error!!)
+                    if (uiState.isOffline) {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            "Pulsa OK para continuar en modo offline",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { viewModel.clearError() }) {
+                    Text("OK")
+                }
+            },
+            dismissButton = if (uiState.isOffline) {
+                {
+                    Button(
+                        onClick = {
+                            viewModel.checkConnectionAndRefresh()
+                            viewModel.clearError()
+                        },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.primary
+                        )
+                    ) {
+                        Text("Reintentar conexión")
+                    }
+                }
+            } else null
+        )
+    }
+
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("Series Populares") },
+                title = {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text("Series Populares")
+                        if (uiState.isOffline) {
+                            Badge(
+                                containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                                contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+                            ) {
+                                Text("Offline", style = MaterialTheme.typography.labelSmall)
+                            }
+                        }
+                    }
+                },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                     titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
@@ -65,10 +126,20 @@ fun SeriesListScreen(
         },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = { viewModel.refreshSeries() },
-                containerColor = MaterialTheme.colorScheme.primary
+                onClick = {
+                    if (uiState.isOffline) {
+                        viewModel.checkConnectionAndRefresh()
+                    } else {
+                        viewModel.refreshSeries()
+                    }
+                },
+                containerColor = if (uiState.isOffline) MaterialTheme.colorScheme.secondary
+                else MaterialTheme.colorScheme.primary
             ) {
-                Icon(Icons.Filled.Refresh, contentDescription = "Recargar")
+                Icon(
+                    if (uiState.isOffline) Icons.Default.WifiOff else Icons.Filled.Refresh,
+                    contentDescription = if (uiState.isOffline) "Reintentar conexión" else "Recargar"
+                )
             }
         }
     ) { paddingValues ->
@@ -84,14 +155,12 @@ fun SeriesListScreen(
                     message = "Cargando series..."
                 )
             }
-            // Estado de error
+            // Estado de error (sin series)
             else if (uiState.error != null && uiState.series.isEmpty()) {
-                uiState.error?.let { errorMessage ->
-                    ListErrorState(
-                        message = errorMessage,
-                        onRetry = { viewModel.loadInitialSeries() }
-                    )
-                }
+                ListErrorState(
+                    message = uiState.error!!,
+                    onRetry = { viewModel.loadInitialSeries() }
+                )
             }
             // Lista de series
             else {
@@ -107,7 +176,7 @@ fun SeriesListScreen(
                         }
                     }
 
-                    // Carga al final para paginación
+                    // Indicador de carga al final para paginación
                     if (uiState.isLoadingMore) {
                         item {
                             LoadingItem(message = "Cargando más series...")
@@ -117,19 +186,9 @@ fun SeriesListScreen(
                     // Mensaje cuando no hay más series
                     if (!uiState.isLoadingMore && uiState.series.isNotEmpty()) {
                         item {
-                            EndOfListMessage()
+                            EndOfListMessage(isOffline = uiState.isOffline)
                         }
                     }
-                }
-            }
-
-            // Error overlay (para errores durante la paginación)
-            if (uiState.error != null && uiState.series.isNotEmpty()) {
-                uiState.error?.let { errorMessage ->
-                    ListErrorSnackbar(
-                        message = errorMessage,
-                        onDismiss = { /* Podríamos resetear el error en el ViewModel */ }
-                    )
                 }
             }
         }
@@ -212,7 +271,6 @@ fun SeriesCard(
     }
 }
 
-
 @Composable
 fun ListErrorState(
     message: String,
@@ -242,22 +300,32 @@ fun ListErrorState(
 }
 
 @Composable
-fun EndOfListMessage() {
+fun EndOfListMessage(isOffline: Boolean = false) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp),
         contentAlignment = Alignment.Center
     ) {
-        Text(
-            text = "No hay más series para mostrar",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center
-        )
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(
+                text = if (isOffline) "Fin de series guardadas" else "No hay más series para mostrar",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center
+            )
+            if (isOffline) {
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = "Conéctate a internet para cargar más",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center
+                )
+            }
+        }
     }
 }
-
 
 @Composable
 fun ListErrorSnackbar(

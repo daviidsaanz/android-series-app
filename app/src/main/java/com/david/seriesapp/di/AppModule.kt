@@ -1,11 +1,17 @@
 package com.david.seriesapp.di
 
+import android.content.Context
+import com.david.seriesapp.data.local.dao.SeriesDao
+import com.david.seriesapp.data.local.database.SeriesDatabase
 import com.david.seriesapp.data.remote.TvSeriesApi
 import com.david.seriesapp.data.repository.TvSeriesRepositoryImpl
 import com.david.seriesapp.domain.repository.TvSeriesRepository
+import com.david.seriesapp.utils.ConnectivityManager
+import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -26,7 +32,6 @@ object AppModule {
         val logging = HttpLoggingInterceptor().apply {
             level = HttpLoggingInterceptor.Level.BODY
         }
-
         return OkHttpClient.Builder()
             .addInterceptor { chain ->
                 val original = chain.request()
@@ -60,7 +65,29 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideTvSeriesRepository(api: TvSeriesApi): TvSeriesRepository {
-        return TvSeriesRepositoryImpl(api)
+    fun provideSeriesDatabase(@ApplicationContext context: Context): SeriesDatabase {
+        return SeriesDatabase.getInstance(context)
+    }
+
+    @Provides
+    @Singleton
+    fun provideSeriesDao(database: SeriesDatabase): SeriesDao {
+        return database.seriesDao()
+    }
+
+    @Module
+    @InstallIn(SingletonComponent::class)
+    abstract class RepositoryModule {
+
+        @Binds
+        @Singleton
+        abstract fun bindTvSeriesRepository(
+            impl: TvSeriesRepositoryImpl
+        ): TvSeriesRepository
+    }
+    @Provides
+    @Singleton
+    fun provideConnectivityManager(@ApplicationContext context: Context): ConnectivityManager {
+        return ConnectivityManager(context)
     }
 }
