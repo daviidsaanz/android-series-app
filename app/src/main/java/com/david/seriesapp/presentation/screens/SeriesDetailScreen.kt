@@ -9,7 +9,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material.icons.filled.PlayArrow
@@ -37,6 +36,7 @@ import coil.compose.SubcomposeAsyncImage
 import com.david.seriesapp.presentation.components.GenreChips
 import com.david.seriesapp.presentation.components.LoadingItem
 import com.david.seriesapp.presentation.components.RatingBar
+import com.david.seriesapp.presentation.viewmodels.SeriesDetailUiState
 import com.david.seriesapp.presentation.viewmodels.SeriesDetailViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -76,23 +76,25 @@ fun SeriesDetailScreen(
                 .padding(paddingValues)
         ) {
             when (uiState) {
-                is com.david.seriesapp.presentation.viewmodels.SeriesDetailUiState.Loading -> {
-                    LoadingItem(
-                        modifier = Modifier.align(Alignment.Center),
-                        message = "Cargando detalles..."
-                    )
+                is SeriesDetailUiState.Loading -> {
+                    LoadingItem(modifier = Modifier.align(Alignment.Center), message = "Cargando detalles...")
                 }
-
-                is com.david.seriesapp.presentation.viewmodels.SeriesDetailUiState.Success -> {
-                    val seriesDetail = (uiState as com.david.seriesapp.presentation.viewmodels.SeriesDetailUiState.Success)
-                        .seriesDetail
+                is SeriesDetailUiState.Success -> {
+                    val seriesDetail = (uiState as SeriesDetailUiState.Success).seriesDetail
                     DetailContent(seriesDetail = seriesDetail)
                 }
-
-                is com.david.seriesapp.presentation.viewmodels.SeriesDetailUiState.Error -> {
+                is SeriesDetailUiState.Offline -> {
+                    val offlineState = uiState as SeriesDetailUiState.Offline
+                    // Crea una pantalla simplificada para offline
+                    OfflineDetailContent(
+                        series = offlineState.series,
+                        message = offlineState.message
+                    )
+                }
+                is SeriesDetailUiState.Error -> {
                     DetailErrorState(
-                        message = (uiState as com.david.seriesapp.presentation.viewmodels.SeriesDetailUiState.Error).message,
-                        onRetry = {  }
+                        message = (uiState as SeriesDetailUiState.Error).message,
+                        onRetry = { /* Podríamos obtener el ID de alguna manera */ }
                     )
                 }
             }
@@ -521,6 +523,184 @@ fun DetailErrorState(
             )
         ) {
             Text("Reintentar")
+        }
+    }
+}
+
+@Composable
+fun OfflineDetailContent(
+    series: com.david.seriesapp.data.remote.TvSeriesDto,
+    message: String
+) {
+    val scrollState = rememberScrollState()
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(scrollState)
+    ) {
+        // Banner de advertencia offline
+        Surface(
+            color = MaterialTheme.colorScheme.secondaryContainer,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.Default.ErrorOutline,
+                    contentDescription = "Offline",
+                    tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                    modifier = Modifier.size(20.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = message,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSecondaryContainer,
+                    modifier = Modifier.weight(1f)
+                )
+            }
+        }
+
+        // Contenido simplificado para offline
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(250.dp)
+        ) {
+            // Imagen del póster
+            AsyncImage(
+                model = series.fullPosterPath,
+                contentDescription = "Póster de ${series.name}",
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop
+            )
+
+            // Overlay oscuro
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(
+                        Brush.verticalGradient(
+                            colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.7f)),
+                            startY = 0f,
+                            endY = 250f
+                        )
+                    )
+            )
+
+            // Título sobre la imagen
+            Text(
+                text = series.name,
+                style = MaterialTheme.typography.headlineMedium,
+                color = Color.White,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier
+                    .align(Alignment.BottomStart)
+                    .padding(16.dp)
+            )
+        }
+
+        // Información básica
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(20.dp)
+        ) {
+            // Rating
+            Row(
+                modifier = Modifier.padding(bottom = 16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.Default.ErrorOutline,
+                    contentDescription = "Info offline",
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(16.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = "⭐ ${String.format("%.1f", series.voteAverage)}/10",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            // Sinopsis (si existe)
+            if (series.overview.isNotEmpty()) {
+                Text(
+                    text = "Sinopsis",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+
+                Text(
+                    text = series.overview,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    lineHeight = 24.sp
+                )
+            } else {
+                Text(
+                    text = "Sinopsis no disponible en modo offline",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontStyle = FontStyle.Italic,
+                    modifier = Modifier.padding(vertical = 16.dp)
+                )
+            }
+
+            // Fecha de estreno (si existe)
+            series.firstAirDate?.let { date ->
+                Spacer(modifier = Modifier.height(16.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = "Estreno",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Text(
+                        text = date.take(4),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
+            }
+
+            // Mensaje informativo
+            Spacer(modifier = Modifier.height(24.dp))
+            Card(
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant
+                )
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    Text(
+                        text = "Información limitada",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                    Text(
+                        text = "Algunos detalles como creadores, temporadas y episodios completos solo están disponibles con conexión a internet.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(top = 4.dp)
+                    )
+                }
+            }
         }
     }
 }

@@ -3,7 +3,6 @@ package com.david.seriesapp.presentation.viewmodels
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.david.seriesapp.data.remote.SeriesDetailResponse
 import com.david.seriesapp.domain.repository.TvSeriesRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -30,11 +29,36 @@ class SeriesDetailViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.value = SeriesDetailUiState.Loading
             try {
+                // Intenta cargar desde API
                 val response = repository.getSeriesDetail(seriesId)
                 _uiState.value = SeriesDetailUiState.Success(response)
             } catch (e: Exception) {
+                // Si falla, intenta cargar desde cache
+                loadSeriesDetailFromCache(seriesId, e)
+            }
+        }
+    }
+
+    private fun loadSeriesDetailFromCache(seriesId: Int, exception: Exception) {
+        viewModelScope.launch {
+            if (repository is com.david.seriesapp.data.repository.TvSeriesRepositoryImpl) {
+                repository.getCachedSeriesById(seriesId).collect { cachedSeries ->
+                    if (cachedSeries != null) {
+                        // Convertir TvSeriesDto a algo que se pueda mostrar en detalle
+                        // Necesitarás crear un mapper o extender TvSeriesDto
+                        _uiState.value = SeriesDetailUiState.Offline(
+                            series = cachedSeries,
+                            message = "Modo offline. Mostrando información guardada."
+                        )
+                    } else {
+                        _uiState.value = SeriesDetailUiState.Error(
+                            message = "No hay conexión y no hay detalles guardados: ${exception.message}"
+                        )
+                    }
+                }
+            } else {
                 _uiState.value = SeriesDetailUiState.Error(
-                    message = e.message ?: "Error al cargar los detalles"
+                    message = "Modo offline no disponible: ${exception.message}"
                 )
             }
         }
@@ -47,6 +71,7 @@ class SeriesDetailViewModel @Inject constructor(
 
 sealed class SeriesDetailUiState {
     data object Loading : SeriesDetailUiState()
-    data class Success(val seriesDetail: SeriesDetailResponse) : SeriesDetailUiState()
+    data class Success(val seriesDetail: com.david.seriesapp.data.remote.SeriesDetailResponse) : SeriesDetailUiState()
+    data class Offline(val series: com.david.seriesapp.data.remote.TvSeriesDto, val message: String) : SeriesDetailUiState()
     data class Error(val message: String) : SeriesDetailUiState()
 }
