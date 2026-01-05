@@ -38,7 +38,10 @@ import coil.compose.AsyncImage
 import com.david.seriesapp.R
 import com.david.seriesapp.data.remote.TvSeriesDto
 import com.david.seriesapp.presentation.components.LoadingItem
+import com.david.seriesapp.presentation.components.RecommendationSection
+import com.david.seriesapp.presentation.components.SectionTitle
 import com.david.seriesapp.presentation.navigation.Routes
+import com.david.seriesapp.presentation.viewmodels.RecommendationViewModel
 import com.david.seriesapp.presentation.viewmodels.TvSeriesViewModel
 import androidx.compose.material.icons.filled.WifiOff
 
@@ -47,11 +50,22 @@ import androidx.compose.material.icons.filled.WifiOff
 fun SeriesListScreen(
     navController: NavController,
     onLanguageChange: () -> Unit,
-    viewModel: TvSeriesViewModel = hiltViewModel()
+    viewModel: TvSeriesViewModel = hiltViewModel(),
+    recommendationViewModel: RecommendationViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val listState = rememberLazyListState()
     val context = LocalContext.current
+
+    // Estados para las recomendaciones
+    val recommendations by recommendationViewModel.recommendations.collectAsState()
+    val recommendationsLoading by recommendationViewModel.isLoading.collectAsState()
+
+    // Simulamos series "vistas" (en una app real, esto vendría de Room/Preferencias)
+    // Por ahora, simulamos que las primeras 3 series son "vistas"
+    val viewedSeries = remember(uiState.series) {
+        uiState.series.take(3)
+    }
 
     // Detecta cuando el usuario está cerca del final de la lista
     val isNearBottom by remember {
@@ -65,6 +79,16 @@ fun SeriesListScreen(
     LaunchedEffect(isNearBottom) {
         if (isNearBottom && !uiState.isLoadingMore && !uiState.isLoading) {
             viewModel.loadMoreSeries()
+        }
+    }
+
+    // Generar recomendaciones cuando se cargan las series
+    LaunchedEffect(uiState.series) {
+        if (uiState.series.isNotEmpty() && !uiState.isLoading) {
+            recommendationViewModel.generateRecommendations(
+                allSeries = uiState.series,
+                viewedSeries = viewedSeries
+            )
         }
     }
 
@@ -249,14 +273,31 @@ fun SeriesListScreen(
                     onRetry = { viewModel.loadInitialSeries() }
                 )
             }
-            // Lista de series
+            // Lista de series con recomendaciones
             else {
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
                     state = listState,
-                    contentPadding = PaddingValues(12.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                    contentPadding = PaddingValues(bottom = 80.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
+                    // SECCIÓN DE RECOMENDACIONES (IA)
+                    item {
+                        RecommendationSection(
+                            recommendations = recommendations,
+                            description = recommendationViewModel.getRecommendationDescription(viewedSeries),
+                            isLoading = recommendationsLoading,
+                            navController = navController,
+                            modifier = Modifier.padding(top = 8.dp)
+                        )
+                    }
+
+                    // SECCIÓN DE SERIES POPULARES
+                    item {
+                        SectionTitle("Series Populares")
+                    }
+
+                    // LISTA DE SERIES
                     items(uiState.series) { serie ->
                         SeriesCardImproved(serie = serie) {
                             navController.navigate(Routes.SeriesDetail.createRoute(serie.id))
@@ -288,7 +329,9 @@ fun SeriesCardImproved(
     onClick: () -> Unit
 ) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 4.dp),
         onClick = onClick,
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceVariant
