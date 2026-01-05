@@ -8,7 +8,7 @@ plugins {
 
 android {
     namespace = "com.david.seriesapp"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.david.seriesapp"
@@ -62,6 +62,7 @@ dependencies {
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.compose.ui.text)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
@@ -76,20 +77,25 @@ dependencies {
     kapt(libs.google.hilt.android.compiler)
     implementation(libs.androidx.hilt.navigation.compose)
 
-    // Dependencias para networking
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
     implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
 
-    // Dependencias para imágenes
     implementation("io.coil-kt:coil-compose:2.6.0")
 
-    // Dependencias para Room
     implementation("androidx.room:room-runtime:2.6.1")
     kapt("androidx.room:room-compiler:2.6.1")
     implementation("androidx.room:room-ktx:2.6.1")
 
     implementation("androidx.navigation:navigation-compose:2.7.5")
+
+    implementation("androidx.compose.material:material-icons-extended")
+
+    implementation("androidx.room:room-runtime:2.6.1")
+    kapt("androidx.room:room-compiler:2.6.1")
+    implementation("androidx.room:room-ktx:2.6.1")
+
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
 }
 
 kapt {

@@ -1,22 +1,13 @@
-package com.david.seriesapp.theme
+package com.david.seriesapp.presentation.theme
+
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
-import com.david.seriesapp.presentation.theme.BackgroundLight
-import com.david.seriesapp.presentation.theme.BorderLight
-import com.david.seriesapp.presentation.theme.DividerLight
-import com.david.seriesapp.presentation.theme.OverlayLight
-import com.david.seriesapp.presentation.theme.SurfaceLight
-import com.david.seriesapp.presentation.theme.SurfaceVariantLight
-import com.david.seriesapp.presentation.theme.TextOnPrimary
-import com.david.seriesapp.presentation.theme.TextOnSurface
-import com.david.seriesapp.presentation.theme.TextPrimaryLight
-import com.david.seriesapp.presentation.theme.TextSecondaryLight
-import com.david.seriesapp.presentation.theme.TmdbDarkBlue
-import com.david.seriesapp.presentation.theme.TmdbError
-import com.david.seriesapp.presentation.theme.TmdbPrimary
-import com.david.seriesapp.presentation.theme.TmdbSuccess
-import com.david.seriesapp.presentation.theme.TmdbWarning
+import androidx.compose.ui.graphics.Color
+import com.david.seriesapp.theme.Shapes
+import com.david.seriesapp.theme.Typography
 
 private val LightColorScheme = lightColorScheme(
     primary = TmdbPrimary,
@@ -55,13 +46,54 @@ private val LightColorScheme = lightColorScheme(
     surfaceTint = TmdbPrimary
 )
 
+private val DarkColorScheme = darkColorScheme(
+    primary = TmdbPrimaryDark,
+    onPrimary = Color.White,
+    primaryContainer = TmdbPrimaryDark.copy(alpha = 0.2f),
+    onPrimaryContainer = Color.White,
+
+    secondary = TmdbSuccessDark,
+    onSecondary = Color.Black,
+    secondaryContainer = TmdbSuccessDark.copy(alpha = 0.2f),
+    onSecondaryContainer = TmdbSuccessDark,
+
+    tertiary = TmdbWarningDark,
+    onTertiary = Color.Black,
+    tertiaryContainer = TmdbWarningDark.copy(alpha = 0.2f),
+    onTertiaryContainer = TmdbWarningDark,
+
+    background = BackgroundDark,
+    onBackground = TextPrimaryDark,
+
+    surface = SurfaceDark,
+    onSurface = TextOnSurfaceDark,
+
+    surfaceVariant = SurfaceVariantDark,
+    onSurfaceVariant = TextSecondaryDark,
+
+    outline = BorderDark,
+    outlineVariant = DividerDark,
+
+    error = TmdbErrorDark,
+    onError = Color.White,
+    errorContainer = TmdbErrorDark.copy(alpha = 0.2f),
+    onErrorContainer = TmdbErrorDark,
+
+    scrim = OverlayDark,
+    surfaceTint = TmdbPrimaryDark
+)
+
 @Composable
 fun SeriesAppTheme(
-    darkTheme: Boolean = false,
+    darkTheme: Boolean = isSystemInDarkTheme(),
     dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
-    val colorScheme = LightColorScheme
+    val colorScheme = if (darkTheme) {
+        DarkColorScheme
+    } else {
+        LightColorScheme
+    }
 
     MaterialTheme(
         colorScheme = colorScheme,
