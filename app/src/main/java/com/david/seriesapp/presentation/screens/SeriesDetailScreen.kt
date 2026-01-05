@@ -24,6 +24,8 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -33,6 +35,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import coil.compose.SubcomposeAsyncImage
+import com.david.seriesapp.R
 import com.david.seriesapp.presentation.components.GenreChips
 import com.david.seriesapp.presentation.components.LoadingItem
 import com.david.seriesapp.presentation.components.RatingBar
@@ -47,63 +50,44 @@ fun SeriesDetailScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    Scaffold(
-        topBar = {
-            if (uiState is com.david.seriesapp.presentation.viewmodels.SeriesDetailUiState.Success) {
-                CollapsingToolbar(
-                    title = (uiState as com.david.seriesapp.presentation.viewmodels.SeriesDetailUiState.Success)
-                        .seriesDetail.name,
-                    navController = navController
-                )
-            } else {
-                CenterAlignedTopAppBar(
-                    title = { Text("Detalles") },
-                    navigationIcon = {
-                        IconButton(onClick = { navController.popBackStack() }) {
-                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver")
-                        }
-                    },
-                    colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.surface
-                    )
+    Box(
+        modifier = Modifier.fillMaxSize()
+    ) {
+        when (uiState) {
+            is SeriesDetailUiState.Loading -> {
+                LoadingItem(
+                    modifier = Modifier.align(Alignment.Center),
+                    message = stringResource(R.string.loading_series)
                 )
             }
-        }
-    ) { paddingValues ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-        ) {
-            when (uiState) {
-                is SeriesDetailUiState.Loading -> {
-                    LoadingItem(modifier = Modifier.align(Alignment.Center), message = "Cargando detalles...")
-                }
-                is SeriesDetailUiState.Success -> {
-                    val seriesDetail = (uiState as SeriesDetailUiState.Success).seriesDetail
-                    DetailContent(seriesDetail = seriesDetail)
-                }
-                is SeriesDetailUiState.Offline -> {
-                    val offlineState = uiState as SeriesDetailUiState.Offline
-                    // Crea una pantalla simplificada para offline
-                    OfflineDetailContent(
-                        series = offlineState.series,
-                        message = offlineState.message
-                    )
-                }
-                is SeriesDetailUiState.Error -> {
-                    DetailErrorState(
-                        message = (uiState as SeriesDetailUiState.Error).message,
-                        onRetry = { /* Podríamos obtener el ID de alguna manera */ }
-                    )
-                }
+            is SeriesDetailUiState.Success -> {
+                val seriesDetail = (uiState as SeriesDetailUiState.Success).seriesDetail
+                DetailContentOriginalMejorado(seriesDetail = seriesDetail, navController = navController)
+            }
+            is SeriesDetailUiState.Offline -> {
+                val offlineState = uiState as SeriesDetailUiState.Offline
+                OfflineDetailContent(
+                    series = offlineState.series,
+                    message = offlineState.message,
+                    navController = navController
+                )
+            }
+            is SeriesDetailUiState.Error -> {
+                DetailErrorState(
+                    message = (uiState as SeriesDetailUiState.Error).message,
+                    onRetry = { /* Podríamos obtener el ID de alguna manera */ },
+                    navController = navController
+                )
             }
         }
     }
 }
 
 @Composable
-fun DetailContent(seriesDetail: com.david.seriesapp.data.remote.SeriesDetailResponse) {
+fun DetailContentOriginalMejorado(
+    seriesDetail: com.david.seriesapp.data.remote.SeriesDetailResponse,
+    navController: NavController
+) {
     val scrollState = rememberScrollState()
 
     Column(
@@ -111,13 +95,13 @@ fun DetailContent(seriesDetail: com.david.seriesapp.data.remote.SeriesDetailResp
             .fillMaxSize()
             .verticalScroll(scrollState)
     ) {
-        // Hero Section con imagen de fondo
+
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(300.dp)
         ) {
-            // Imagen de fondo con overlay gradiente
+
             SubcomposeAsyncImage(
                 model = "https://image.tmdb.org/t/p/original${seriesDetail.backdropPath}",
                 contentDescription = "Fondo de ${seriesDetail.name}",
@@ -132,15 +116,16 @@ fun DetailContent(seriesDetail: com.david.seriesapp.data.remote.SeriesDetailResp
                 }
             )
 
-            // Overlay gradiente
             Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .background(
                         Brush.verticalGradient(
                             colors = listOf(
+                                Color.Black.copy(alpha = 0.3f),
                                 Color.Transparent,
-                                MaterialTheme.colorScheme.surface
+                                Color.Transparent,
+                                MaterialTheme.colorScheme.surface.copy(alpha = 0.9f)
                             ),
                             startY = 0f,
                             endY = 300f
@@ -148,7 +133,22 @@ fun DetailContent(seriesDetail: com.david.seriesapp.data.remote.SeriesDetailResp
                     )
             )
 
-            // Póster en el centro
+            IconButton(
+                onClick = { navController.popBackStack() },
+                modifier = Modifier
+                    .padding(top = 16.dp, start = 16.dp)
+                    .size(48.dp)
+                    .clip(CircleShape)
+                    .background(Color.Black.copy(alpha = 0.5f))
+            ) {
+                Icon(
+                    Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = stringResource(R.string.back_button),
+                    tint = Color.White,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+
             Card(
                 modifier = Modifier
                     .size(140.dp)
@@ -166,7 +166,6 @@ fun DetailContent(seriesDetail: com.david.seriesapp.data.remote.SeriesDetailResp
             }
         }
 
-        // Espacio para el póster
         Spacer(modifier = Modifier.height(80.dp))
 
         // Contenido principal
@@ -176,7 +175,6 @@ fun DetailContent(seriesDetail: com.david.seriesapp.data.remote.SeriesDetailResp
                 .padding(horizontal = 20.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Título
             Text(
                 text = seriesDetail.name,
                 style = MaterialTheme.typography.headlineLarge,
@@ -186,7 +184,6 @@ fun DetailContent(seriesDetail: com.david.seriesapp.data.remote.SeriesDetailResp
                 modifier = Modifier.padding(bottom = 8.dp)
             )
 
-            // Tagline (si existe)
             seriesDetail.tagline?.let { tagline ->
                 Text(
                     text = "\"$tagline\"",
@@ -198,19 +195,16 @@ fun DetailContent(seriesDetail: com.david.seriesapp.data.remote.SeriesDetailResp
                 )
             }
 
-            // Rating
             RatingBar(
                 rating = seriesDetail.voteAverage,
                 modifier = Modifier.padding(bottom = 16.dp)
             )
 
-            // Géneros
             GenreChips(
                 genres = seriesDetail.genres,
                 modifier = Modifier.padding(bottom = 24.dp)
             )
 
-            // Stats en tarjetas
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -219,27 +213,26 @@ fun DetailContent(seriesDetail: com.david.seriesapp.data.remote.SeriesDetailResp
             ) {
                 StatCard(
                     icon = Icons.Filled.CalendarToday,
-                    title = "Estreno",
+                    title = stringResource(R.string.release_label),
                     value = seriesDetail.firstAirDate?.take(4) ?: "N/A",
                     modifier = Modifier.weight(1f)
                 )
 
                 StatCard(
-                    icon = Icons.Filled.Tv, // CAMBIADO DE Season A Tv
-                    title = "Temporadas",
+                    icon = Icons.Filled.Tv,
+                    title = stringResource(R.string.seasons_label),
                     value = seriesDetail.numberOfSeasons.toString(),
                     modifier = Modifier.weight(1f)
                 )
 
                 StatCard(
                     icon = Icons.Filled.PlayArrow,
-                    title = "Episodios",
+                    title = stringResource(R.string.episodes_label),
                     value = seriesDetail.numberOfEpisodes.toString(),
                     modifier = Modifier.weight(1f)
                 )
             }
 
-            // Sinopsis
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -253,7 +246,7 @@ fun DetailContent(seriesDetail: com.david.seriesapp.data.remote.SeriesDetailResp
                     modifier = Modifier.padding(20.dp)
                 ) {
                     Text(
-                        text = "Sinopsis",
+                        text = stringResource(R.string.synopsis_title),
                         style = MaterialTheme.typography.titleLarge,
                         color = MaterialTheme.colorScheme.onSurface,
                         fontWeight = FontWeight.SemiBold,
@@ -264,12 +257,11 @@ fun DetailContent(seriesDetail: com.david.seriesapp.data.remote.SeriesDetailResp
                         text = seriesDetail.overview,
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        lineHeight = 24.sp // CAMBIADO
+                        lineHeight = 24.sp
                     )
                 }
             }
 
-            // Información adicional
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -282,7 +274,7 @@ fun DetailContent(seriesDetail: com.david.seriesapp.data.remote.SeriesDetailResp
                     modifier = Modifier.padding(20.dp)
                 ) {
                     Text(
-                        text = "Información Adicional",
+                        text = stringResource(R.string.additional_info),
                         style = MaterialTheme.typography.titleLarge,
                         color = MaterialTheme.colorScheme.onSurface,
                         fontWeight = FontWeight.SemiBold,
@@ -290,25 +282,24 @@ fun DetailContent(seriesDetail: com.david.seriesapp.data.remote.SeriesDetailResp
                     )
 
                     InfoRow(
-                        title = "Estado",
+                        title = stringResource(R.string.status_label),
                         value = seriesDetail.status
                     )
 
                     InfoRow(
-                        title = "Última emisión",
+                        title = stringResource(R.string.last_air_date_label),
                         value = seriesDetail.lastAirDate ?: "N/A"
                     )
 
                     InfoRow(
-                        title = "Votos totales",
+                        title = stringResource(R.string.total_votes_label),
                         value = seriesDetail.voteCount.toString()
                     )
 
-                    // Creadores (si existen)
                     seriesDetail.createdBy?.takeIf { it.isNotEmpty() }?.let { creators ->
                         Spacer(modifier = Modifier.height(12.dp))
                         Text(
-                            text = "Creadores",
+                            text = stringResource(R.string.creators_label),
                             style = MaterialTheme.typography.titleMedium,
                             color = MaterialTheme.colorScheme.onSurface,
                             modifier = Modifier.padding(bottom = 8.dp)
@@ -328,40 +319,6 @@ fun DetailContent(seriesDetail: com.david.seriesapp.data.remote.SeriesDetailResp
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun CollapsingToolbar(
-    title: String,
-    navController: NavController
-) {
-    LargeTopAppBar(
-        title = {
-            Text(
-                text = title,
-                maxLines = 1,
-                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
-            )
-        },
-        navigationIcon = {
-            IconButton(
-                onClick = { navController.popBackStack() },
-                modifier = Modifier
-                    .background(
-                        MaterialTheme.colorScheme.surface.copy(alpha = 0.8f),
-                        CircleShape
-                    )
-                    .padding(4.dp)
-            ) {
-                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver", tint = MaterialTheme.colorScheme.onSurface)
-            }
-        },
-        colors = TopAppBarDefaults.largeTopAppBarColors(
-            containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.95f),
-            scrolledContainerColor = MaterialTheme.colorScheme.surface
-        )
-    )
-}
-
 @Composable
 fun StatCard(
     icon: androidx.compose.ui.graphics.vector.ImageVector,
@@ -374,7 +331,8 @@ fun StatCard(
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        shape = RoundedCornerShape(12.dp)
     ) {
         Column(
             modifier = Modifier.padding(vertical = 16.dp, horizontal = 12.dp),
@@ -485,7 +443,8 @@ fun CreatorItem(creator: com.david.seriesapp.data.remote.CreatorDto) {
 @Composable
 fun DetailErrorState(
     message: String,
-    onRetry: () -> Unit
+    onRetry: () -> Unit,
+    navController: NavController
 ) {
     Column(
         modifier = Modifier.fillMaxSize(),
@@ -502,7 +461,7 @@ fun DetailErrorState(
         Spacer(modifier = Modifier.height(16.dp))
 
         Text(
-            text = "Error al cargar",
+            text = stringResource(R.string.error_loading),
             style = MaterialTheme.typography.titleLarge,
             color = MaterialTheme.colorScheme.error
         )
@@ -520,9 +479,16 @@ fun DetailErrorState(
             onClick = onRetry,
             colors = ButtonDefaults.buttonColors(
                 containerColor = MaterialTheme.colorScheme.primary
-            )
+            ),
+            shape = RoundedCornerShape(12.dp)
         ) {
-            Text("Reintentar")
+            Text(stringResource(R.string.retry))
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        TextButton(onClick = { navController.popBackStack() }) {
+            Text("Volver a la lista")
         }
     }
 }
@@ -530,7 +496,8 @@ fun DetailErrorState(
 @Composable
 fun OfflineDetailContent(
     series: com.david.seriesapp.data.remote.TvSeriesDto,
-    message: String
+    message: String,
+    navController: NavController
 ) {
     val scrollState = rememberScrollState()
 
@@ -539,7 +506,6 @@ fun OfflineDetailContent(
             .fillMaxSize()
             .verticalScroll(scrollState)
     ) {
-        // Banner de advertencia offline
         Surface(
             color = MaterialTheme.colorScheme.secondaryContainer,
             modifier = Modifier.fillMaxWidth()
@@ -566,13 +532,11 @@ fun OfflineDetailContent(
             }
         }
 
-        // Contenido simplificado para offline
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(250.dp)
         ) {
-            // Imagen del póster
             AsyncImage(
                 model = series.fullPosterPath,
                 contentDescription = "Póster de ${series.name}",
@@ -580,7 +544,6 @@ fun OfflineDetailContent(
                 contentScale = ContentScale.Crop
             )
 
-            // Overlay oscuro
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -592,6 +555,22 @@ fun OfflineDetailContent(
                         )
                     )
             )
+
+            IconButton(
+                onClick = { navController.popBackStack() },
+                modifier = Modifier
+                    .padding(top = 16.dp, start = 16.dp)
+                    .size(48.dp)
+                    .clip(CircleShape)
+                    .background(Color.Black.copy(alpha = 0.5f))
+            ) {
+                Icon(
+                    Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = stringResource(R.string.back_button),
+                    tint = Color.White,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
 
             // Título sobre la imagen
             Text(
@@ -605,7 +584,6 @@ fun OfflineDetailContent(
             )
         }
 
-        // Información básica
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -630,10 +608,9 @@ fun OfflineDetailContent(
                 )
             }
 
-            // Sinopsis (si existe)
             if (series.overview.isNotEmpty()) {
                 Text(
-                    text = "Sinopsis",
+                    text = stringResource(R.string.synopsis_title),
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurface,
                     fontWeight = FontWeight.SemiBold,
@@ -656,7 +633,6 @@ fun OfflineDetailContent(
                 )
             }
 
-            // Fecha de estreno (si existe)
             series.firstAirDate?.let { date ->
                 Spacer(modifier = Modifier.height(16.dp))
                 Row(
@@ -664,7 +640,7 @@ fun OfflineDetailContent(
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
-                        text = "Estreno",
+                        text = stringResource(R.string.release_label),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -677,12 +653,12 @@ fun OfflineDetailContent(
                 }
             }
 
-            // Mensaje informativo
             Spacer(modifier = Modifier.height(24.dp))
             Card(
                 colors = CardDefaults.cardColors(
                     containerColor = MaterialTheme.colorScheme.surfaceVariant
-                )
+                ),
+                shape = RoundedCornerShape(12.dp)
             ) {
                 Column(
                     modifier = Modifier.padding(16.dp)

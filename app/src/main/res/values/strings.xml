@@ -1,3 +1,32 @@
 <resources>
     <string name="app_name">SeriesApp</string>
+    <string name="series_list_title">Series Populares</string>
+    <string name="loading_series">Cargando series…</string>
+    <string name="load_more_series">Cargando más series…</string>
+    <string name="refresh">Recargar</string>
+    <string name="retry_connection">Reintentar conexión</string>
+    <string name="offline_mode">Modo Offline</string>
+    <string name="offline_badge">Offline</string>
+    <string name="error_loading">Error al cargar</string>
+    <string name="retry">Reintentar</string>
+    <string name="end_of_list">No hay más series para mostrar</string>
+    <string name="offline_end_list">Fin de series guardadas</string>
+    <string name="connect_for_more">Conéctate a internet para cargar más</string>
+
+    <string name="details_title">Detalles</string>
+    <string name="synopsis_title">Sinopsis</string>
+    <string name="additional_info">Información Adicional</string>
+    <string name="status_label">Estado</string>
+    <string name="last_air_date_label">Última emisión</string>
+    <string name="total_votes_label">Votos totales</string>
+    <string name="creators_label">Creadores</string>
+    <string name="release_label">Estreno</string>
+    <string name="seasons_label">Temporadas</string>
+    <string name="episodes_label">Episodios</string>
+
+    <string name="back_button">Volver</string>
+
+    <string name="switch_to_english">Cambiar a Inglés</string>
+    <string name="switch_to_spanish">Cambiar a Español</string>
+    <string name="language">Idioma</string>
 </resources>

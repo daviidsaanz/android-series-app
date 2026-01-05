@@ -1,12 +1,17 @@
 package com.david.seriesapp.presentation.screens
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.Tv
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -17,13 +22,20 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import com.david.seriesapp.R
 import com.david.seriesapp.data.remote.TvSeriesDto
 import com.david.seriesapp.presentation.components.LoadingItem
 import com.david.seriesapp.presentation.navigation.Routes
@@ -34,10 +46,12 @@ import androidx.compose.material.icons.filled.WifiOff
 @Composable
 fun SeriesListScreen(
     navController: NavController,
+    onLanguageChange: () -> Unit,
     viewModel: TvSeriesViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val listState = rememberLazyListState()
+    val context = LocalContext.current
 
     // Detecta cuando el usuario está cerca del final de la lista
     val isNearBottom by remember {
@@ -60,7 +74,7 @@ fun SeriesListScreen(
             onDismissRequest = { viewModel.clearError() },
             title = {
                 Text(
-                    if (uiState.isOffline) "Modo Offline" else "Información"
+                    if (uiState.isOffline) stringResource(R.string.offline_mode) else stringResource(R.string.error_loading)
                 )
             },
             text = {
@@ -69,7 +83,7 @@ fun SeriesListScreen(
                     if (uiState.isOffline) {
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            "Pulsa OK para continuar en modo offline",
+                            stringResource(R.string.connect_for_more),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -78,7 +92,7 @@ fun SeriesListScreen(
             },
             confirmButton = {
                 TextButton(onClick = { viewModel.clearError() }) {
-                    Text("OK")
+                    Text(stringResource(R.string.retry))
                 }
             },
             dismissButton = if (uiState.isOffline) {
@@ -92,7 +106,7 @@ fun SeriesListScreen(
                             containerColor = MaterialTheme.colorScheme.primary
                         )
                     ) {
-                        Text("Reintentar conexión")
+                        Text(stringResource(R.string.retry_connection))
                     }
                 }
             } else null
@@ -101,28 +115,96 @@ fun SeriesListScreen(
 
     Scaffold(
         topBar = {
-            CenterAlignedTopAppBar(
-                title = {
+            // TOP APP BAR MEJORADO CON GRADIENTE
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(100.dp)
+                    .background(
+                        brush = Brush.verticalGradient(
+                            colors = listOf(
+                                MaterialTheme.colorScheme.primary,
+                                MaterialTheme.colorScheme.primary.copy(alpha = 0.8f)
+                            ),
+                            startY = 0f,
+                            endY = Float.POSITIVE_INFINITY
+                        )
+                    )
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    // Logo/Título a la izquierda
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        Text("Series Populares")
-                        if (uiState.isOffline) {
-                            Badge(
-                                containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                                contentColor = MaterialTheme.colorScheme.onSecondaryContainer
-                            ) {
-                                Text("Offline", style = MaterialTheme.typography.labelSmall)
+                        // Icono decorativo
+                        Box(
+                            modifier = Modifier
+                                .size(40.dp)
+                                .clip(RoundedCornerShape(10.dp))
+                                .background(Color.White.copy(alpha = 0.2f))
+                                .border(
+                                    width = 2.dp,
+                                    color = Color.White.copy(alpha = 0.3f),
+                                    shape = RoundedCornerShape(10.dp)
+                                ),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.Tv,
+                                contentDescription = "Series",
+                                tint = Color.White,
+                                modifier = Modifier.size(24.dp)
+                            )
+                        }
+
+                        Column {
+                            Text(
+                                text = stringResource(R.string.series_list_title),
+                                style = MaterialTheme.typography.headlineSmall,
+                                color = Color.White,
+                                fontWeight = FontWeight.Bold
+                            )
+
+                            if (uiState.isOffline) {
+                                Badge(
+                                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                                    modifier = Modifier.padding(top = 4.dp)
+                                ) {
+                                    Text(
+                                        stringResource(R.string.offline_badge),
+                                        style = MaterialTheme.typography.labelSmall,
+                                        fontSize = 10.sp
+                                    )
+                                }
                             }
                         }
                     }
-                },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                )
-            )
+
+                    // Botón de idioma a la derecha
+                    IconButton(
+                        onClick = onLanguageChange,
+                        modifier = Modifier
+                            .size(48.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(Color.White.copy(alpha = 0.15f))
+                    ) {
+                        Icon(
+                            Icons.Filled.Language,
+                            contentDescription = stringResource(R.string.language),
+                            tint = Color.White,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
+                }
+            }
         },
         floatingActionButton = {
             FloatingActionButton(
@@ -134,11 +216,16 @@ fun SeriesListScreen(
                     }
                 },
                 containerColor = if (uiState.isOffline) MaterialTheme.colorScheme.secondary
-                else MaterialTheme.colorScheme.primary
+                else MaterialTheme.colorScheme.primary,
+                shape = RoundedCornerShape(16.dp)
             ) {
                 Icon(
                     if (uiState.isOffline) Icons.Default.WifiOff else Icons.Filled.Refresh,
-                    contentDescription = if (uiState.isOffline) "Reintentar conexión" else "Recargar"
+                    contentDescription = if (uiState.isOffline)
+                        stringResource(R.string.retry_connection)
+                    else
+                        stringResource(R.string.refresh),
+                    modifier = Modifier.size(24.dp)
                 )
             }
         }
@@ -152,7 +239,7 @@ fun SeriesListScreen(
             if (uiState.isLoading && uiState.series.isEmpty()) {
                 LoadingItem(
                     modifier = Modifier.align(Alignment.Center),
-                    message = "Cargando series..."
+                    message = stringResource(R.string.loading_series)
                 )
             }
             // Estado de error (sin series)
@@ -167,11 +254,11 @@ fun SeriesListScreen(
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
                     state = listState,
-                    contentPadding = PaddingValues(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                    contentPadding = PaddingValues(12.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     items(uiState.series) { serie ->
-                        SeriesCard(serie = serie) {
+                        SeriesCardImproved(serie = serie) {
                             navController.navigate(Routes.SeriesDetail.createRoute(serie.id))
                         }
                     }
@@ -179,7 +266,7 @@ fun SeriesListScreen(
                     // Indicador de carga al final para paginación
                     if (uiState.isLoadingMore) {
                         item {
-                            LoadingItem(message = "Cargando más series...")
+                            LoadingItem(message = stringResource(R.string.load_more_series))
                         }
                     }
 
@@ -196,7 +283,7 @@ fun SeriesListScreen(
 }
 
 @Composable
-fun SeriesCard(
+fun SeriesCardImproved(
     serie: TvSeriesDto,
     onClick: () -> Unit
 ) {
@@ -206,64 +293,114 @@ fun SeriesCard(
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceVariant
         ),
-        shape = MaterialTheme.shapes.medium
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Row(
             modifier = Modifier.padding(12.dp)
         ) {
-            AsyncImage(
-                model = serie.fullPosterPath,
-                contentDescription = "Póster de ${serie.name}",
-                modifier = Modifier
-                    .size(80.dp)
-                    .clip(RoundedCornerShape(8.dp)),
-                contentScale = ContentScale.Crop
-            )
+            // Póster con borde decorativo
+            Card(
+                shape = RoundedCornerShape(12.dp),
+                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+                modifier = Modifier.size(90.dp)
+            ) {
+                AsyncImage(
+                    model = serie.fullPosterPath,
+                    contentDescription = "Póster de ${serie.name}",
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
+                )
+            }
 
             Spacer(modifier = Modifier.width(12.dp))
 
             Column(
                 modifier = Modifier.weight(1f)
             ) {
-                Text(
-                    text = serie.name,
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
+                // Título con rating
+                Row(
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        text = serie.name,
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f)
+                    )
 
-                Spacer(modifier = Modifier.height(4.dp))
+                    // Rating inline
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Star,
+                            contentDescription = "Rating",
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Text(
+                            text = String.format("%.1f", serie.voteAverage),
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
 
+                Spacer(modifier = Modifier.height(6.dp))
+
+                // Descripción
                 Text(
                     text = serie.overview,
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 3,
-                    overflow = TextOverflow.Ellipsis
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                    lineHeight = 18.sp
                 )
 
-                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(8.dp))
 
+                // Información adicional
                 Row(
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    AssistChip(
-                        onClick = {},
-                        label = { Text("⭐ ${String.format("%.1f", serie.voteAverage)}/10") },
-                        colors = AssistChipDefaults.assistChipColors(
-                            containerColor = MaterialTheme.colorScheme.secondaryContainer
-                        )
-                    )
-
+                    // Año de estreno
                     if (serie.firstAirDate != null) {
-                        AssistChip(
-                            onClick = {},
-                            label = { Text(serie.firstAirDate.take(4)) },
-                            colors = AssistChipDefaults.assistChipColors(
-                                containerColor = MaterialTheme.colorScheme.tertiaryContainer
+                        Surface(
+                            color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.1f),
+                            shape = RoundedCornerShape(8.dp)
+                        ) {
+                            Text(
+                                text = serie.firstAirDate.take(4),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                fontWeight = FontWeight.Medium
                             )
-                        )
+                        }
+                    }
+
+                    // Géneros (primer género si existe)
+                    if (serie.genreIds.isNotEmpty()) {
+                        Surface(
+                            color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.1f),
+                            shape = RoundedCornerShape(8.dp)
+                        ) {
+                            Text(
+                                text = "TV Show",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.secondary,
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                fontWeight = FontWeight.Medium
+                            )
+                        }
                     }
                 }
             }
@@ -281,20 +418,39 @@ fun ListErrorState(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Text(
-            text = "Error al cargar",
-            color = MaterialTheme.colorScheme.error,
-            style = MaterialTheme.typography.titleMedium
+        Icon(
+            imageVector = Icons.Default.WifiOff,
+            contentDescription = "Error",
+            tint = MaterialTheme.colorScheme.error,
+            modifier = Modifier.size(64.dp)
         )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Text(
+            text = stringResource(R.string.error_loading),
+            color = MaterialTheme.colorScheme.error,
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold
+        )
+
         Text(
             text = message,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier.padding(horizontal = 32.dp, vertical = 16.dp),
+            modifier = Modifier
+                .padding(horizontal = 32.dp, vertical = 16.dp),
             textAlign = TextAlign.Center
         )
-        Button(onClick = onRetry) {
-            Text("Reintentar")
+
+        Button(
+            onClick = onRetry,
+            shape = RoundedCornerShape(12.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.primary
+            )
+        ) {
+            Text(stringResource(R.string.retry))
         }
     }
 }
@@ -304,59 +460,37 @@ fun EndOfListMessage(isOffline: Boolean = false) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp),
+            .padding(20.dp),
         contentAlignment = Alignment.Center
     ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Icon(
+                imageVector = if (isOffline) Icons.Default.WifiOff else Icons.Filled.Star,
+                contentDescription = "Fin de lista",
+                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                modifier = Modifier.size(32.dp)
+            )
+
             Text(
-                text = if (isOffline) "Fin de series guardadas" else "No hay más series para mostrar",
+                text = if (isOffline)
+                    stringResource(R.string.offline_end_list)
+                else
+                    stringResource(R.string.end_of_list),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center
             )
+
             if (isOffline) {
-                Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = "Conéctate a internet para cargar más",
+                    text = stringResource(R.string.connect_for_more),
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                     textAlign = TextAlign.Center
                 )
-            }
-        }
-    }
-}
-
-@Composable
-fun ListErrorSnackbar(
-    message: String,
-    onDismiss: () -> Unit
-) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp),
-        contentAlignment = Alignment.BottomCenter
-    ) {
-        Surface(
-            modifier = Modifier.fillMaxWidth(),
-            shape = MaterialTheme.shapes.small,
-            color = MaterialTheme.colorScheme.errorContainer,
-            contentColor = MaterialTheme.colorScheme.onErrorContainer,
-            shadowElevation = 4.dp
-        ) {
-            Row(
-                modifier = Modifier.padding(12.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = message,
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.weight(1f)
-                )
-                TextButton(onClick = onDismiss) {
-                    Text("OK")
-                }
             }
         }
     }
