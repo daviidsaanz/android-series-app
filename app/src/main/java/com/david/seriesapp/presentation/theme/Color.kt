@@ -1,54 +1,50 @@
 package com.david.seriesapp.presentation.theme
 
+import androidx.compose.material3.darkColorScheme
 import androidx.compose.ui.graphics.Color
 
 
-// PALETA VERSIÓN 1.0 - MODO CLARO
-
-val TmdbPrimary = Color(0xFF01B4E4)      // Azul brillante TMDB
-val TmdbDarkBlue = Color(0xFF032541)     // Azul oscuro TMDB
-val TmdbSuccess = Color(0xFF21D07A)      // Verde para ratings/éxito
-val TmdbWarning = Color(0xFFD2D531)      // Amarillo para advertencias
-val TmdbError = Color(0xFFDB2360)        // Rojo para errores
+val TmdbPrimary = Color(0xFF01B4E4)
+val TmdbDarkBlue = Color(0xFF032541)
+val TmdbSuccess = Color(0xFF21D07A)
+val TmdbWarning = Color(0xFFD2D531)
+val TmdbError = Color(0xFFDB2360)
 
 // Colores de fondo y superficie
-val BackgroundLight = Color(0xFFF8F9FA)  // Fondo gris muy claro
-val SurfaceLight = Color(0xFFFFFFFF)     // Superficie/tarjetas blanca
-val SurfaceVariantLight = Color(0xFFE9ECEF) // Variante de superficie (bordes)
+val BackgroundLight = Color(0xFFF8F9FA)
+val SurfaceLight = Color(0xFFFFFFFF)
+val SurfaceVariantLight = Color(0xFFE9ECEF)
 
 // Colores de texto
-val TextPrimaryLight = Color(0xFF212529)     // Texto principal oscuro
-val TextSecondaryLight = Color(0xFF6C757D)   // Texto secundario
-val TextDisabledLight = Color(0xFFADB5BD)    // Texto deshabilitado
-val TextOnPrimary = Color(0xFFFFFFFF)        // Texto sobre fondo primary
-val TextOnSurface = Color(0xFF212529)        // Texto sobre superficie
+val TextPrimaryLight = Color(0xFF212529)
+val TextSecondaryLight = Color(0xFF6C757D)
+val TextDisabledLight = Color(0xFFADB5BD)
+val TextOnPrimary = Color(0xFFFFFFFF)
+val TextOnSurface = Color(0xFF212529)
 
 // Colores de elementos UI
-val BorderLight = Color(0xFFE9ECEF)          // Bordes y separadores
-val DividerLight = Color(0xFFDEE2E6)         // Divisores
-val OverlayLight = Color(0x66000000)         // Overlay semitransparente
+val BorderLight = Color(0xFFE9ECEF)
+val DividerLight = Color(0xFFDEE2E6)
+val OverlayLight = Color(0x66000000)
 
-// Colores de estado
-val SuccessColor = Color(0xFF28A745)         // Éxito
-val WarningColor = Color(0xFFFFC107)         // Advertencia
-val ErrorColor = Color(0xFFDC3545)           // Error
-val InfoColor = Color(0xFF17A2B8)            // Información
 
-// Colores de interacción
-val RippleColor = Color(0x1A01B4E4)          // Color de ripple effect
-val FocusColor = Color(0x3301B4E4)           // Color de focus
 
-// Colores de rating (estrellas)
-val RatingEmpty = Color(0xFFE9ECEF)          // Estrella vacía
-val RatingFull = Color(0xFFFFD700)           // Estrella llena (dorado)
+//PALETA OSCURA
+val BackgroundDark = Color(0xFF0F0F1E)
+val SurfaceDark = Color(0xFF1A1A2E)
+val SurfaceVariantDark = Color(0xFF2D2D44)
 
-// Colores de género (pueden variar)
-val GenreAction = Color(0xFFFF6B6B)          // Acción - rojo
-val GenreComedy = Color(0xFFFFD93D)          // Comedia - amarillo
-val GenreDrama = Color(0xFF6BCF7F)           // Drama - verde
-val GenreSciFi = Color(0xFF4D96FF)           // Sci-Fi - azul
-val GenreFantasy = Color(0xFF9D65C9)         // Fantasía - púrpura
+// Colores de texto para modo oscuro
+val TextPrimaryDark = Color(0xFFE6E6FA)
+val TextSecondaryDark = Color(0xFFB8B8D8)
+val TextOnSurfaceDark = Color(0xFFE6E6FA)
 
-// Gradientes comunes
-val PrimaryGradientStart = TmdbPrimary
-val PrimaryGradientEnd = Color(0xFF1C7ED6)
+// Colores de elementos UI para modo oscuro
+val BorderDark = Color(0xFF2D2D44)
+val DividerDark = Color(0xFF3A3A55)
+val OverlayDark = Color(0x66000000)
+
+val TmdbPrimaryDark = Color(0xFF00D4FF)
+val TmdbSuccessDark = Color(0xFF00FF9D)
+val TmdbWarningDark = Color(0xFFFFEB3B)
+val TmdbErrorDark = Color(0xFFFF4081)
