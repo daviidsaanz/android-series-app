@@ -7,7 +7,7 @@
   <img src="https://img.shields.io/badge/TMDB_API-01B4E4?style=for-the-badge&logo=themoviedatabase&logoColor=white" alt="TMDB API">
 </p>
 
-**SeriesApp** es una aplicación moderna para Android que te permite explorar, descubrir y seguir las series de televisión más populares. Con una interfaz intuitiva y características inteligentes, es tu compañero perfecto para encontrar tu próxima serie favorita.
+Aplicación moderna para Android que te permite explorar, descubrir y seguir las series de televisión más populares.
 
 ## ✨ Características Principales
 
@@ -88,3 +88,8 @@ Un **sistema de recomendaciones inteligente** que analiza las series que ves y s
 - **Recomendaciones sociales**: Ver qué series gustan a personas con gustos similares
 
 Esta funcionalidad demuestra cómo se puede añadir inteligencia a una app de manera sencilla pero efectiva, preparando el terreno para futuras mejoras con tecnologías más avanzadas.
+
+<img width="1080" height="2400" alt="Screenshot_20260105_233841" src="https://github.com/user-attachments/assets/991eb1fd-486f-480b-8162-5b78d5bfdf51" />
+<img width="1080" height="2400" alt="Screenshot_20260105_233808" src="https://github.com/user-attachments/assets/7deab1f5-c790-44d2-9a84-4b964fe1effb" />
+<img width="1080" height="2400" alt="Screenshot_20260105_233709" src="https://github.com/user-attachments/assets/f5496bb7-48b8-4d9c-8972-ed4471d62d6d" />
+<img width="1080" height="2400" alt="Screenshot_20260106_005250" src="https://github.com/user-attachments/assets/246d472f-157d-441e-9b2f-45486a45e524" />
