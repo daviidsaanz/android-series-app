@@ -24,7 +24,6 @@ class RecommendationViewModel @Inject constructor() : ViewModel() {
             _isLoading.value = true
 
             try {
-                // Si no hay series vistas, usar series populares como recomendaciones
                 val recommendations = if (viewedSeries.isEmpty()) {
                     generatePopularRecommendations(allSeries)
                 } else {
@@ -33,7 +32,6 @@ class RecommendationViewModel @Inject constructor() : ViewModel() {
 
                 _recommendations.value = recommendations
             } catch (e: Exception) {
-                // En caso de error, devolver lista vacía
                 _recommendations.value = emptyList()
             } finally {
                 _isLoading.value = false

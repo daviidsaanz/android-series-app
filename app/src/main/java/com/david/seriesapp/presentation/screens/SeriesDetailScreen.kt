@@ -168,7 +168,6 @@ fun DetailContentOriginalMejorado(
 
         Spacer(modifier = Modifier.height(80.dp))
 
-        // Contenido principal
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -402,7 +401,7 @@ fun CreatorItem(creator: com.david.seriesapp.data.remote.CreatorDto) {
                 .padding(12.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Avatar del creador
+
             Box(
                 modifier = Modifier
                     .size(56.dp)
@@ -572,7 +571,7 @@ fun OfflineDetailContent(
                 )
             }
 
-            // Título sobre la imagen
+
             Text(
                 text = series.name,
                 style = MaterialTheme.typography.headlineMedium,
@@ -589,7 +588,6 @@ fun OfflineDetailContent(
                 .fillMaxWidth()
                 .padding(20.dp)
         ) {
-            // Rating
             Row(
                 modifier = Modifier.padding(bottom = 16.dp),
                 verticalAlignment = Alignment.CenterVertically

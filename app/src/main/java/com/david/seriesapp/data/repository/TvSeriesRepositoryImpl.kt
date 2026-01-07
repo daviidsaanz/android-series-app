@@ -20,7 +20,7 @@ class TvSeriesRepositoryImpl @Inject constructor(
     override suspend fun getPopularTvSeries(page: Int): TvSeriesResponse {
         val response = api.getPopularTvSeries(page = page)
 
-        // Guardar en Room usando la función de extensión
+
         val seriesEntities = response.results.map { dto ->
             dto.toSeriesEntity(page = page)
         }
@@ -32,14 +32,12 @@ class TvSeriesRepositoryImpl @Inject constructor(
     override suspend fun getSeriesDetail(seriesId: Int): SeriesDetailResponse {
         val response = api.getSeriesDetail(seriesId = seriesId)
 
-        // Guardar detalles usando la función de extensión
         val seriesEntity = response.toSeriesEntity(page = 1)
         seriesDao.insertSeries(seriesEntity)
 
         return response
     }
 
-    // MÉTODOS PARA MODO OFFLINE
     override fun getCachedSeries(page: Int): Flow<List<TvSeriesDto>> {
         return seriesDao.getSeriesByPage(page).map { entities ->
             entities.map { entity ->

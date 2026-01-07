@@ -57,17 +57,14 @@ fun SeriesListScreen(
     val listState = rememberLazyListState()
     val context = LocalContext.current
 
-    // Estados para las recomendaciones
     val recommendations by recommendationViewModel.recommendations.collectAsState()
     val recommendationsLoading by recommendationViewModel.isLoading.collectAsState()
 
-    // Simulamos series "vistas" (en una app real, esto vendría de Room/Preferencias)
-    // Por ahora, simulamos que las primeras 3 series son "vistas"
+
     val viewedSeries = remember(uiState.series) {
         uiState.series.take(3)
     }
 
-    // Detecta cuando el usuario está cerca del final de la lista
     val isNearBottom by remember {
         derivedStateOf {
             val lastVisibleItem = listState.layoutInfo.visibleItemsInfo.lastOrNull()
@@ -75,14 +72,12 @@ fun SeriesListScreen(
         }
     }
 
-    // Carga más series cuando el usuario está cerca del final
     LaunchedEffect(isNearBottom) {
         if (isNearBottom && !uiState.isLoadingMore && !uiState.isLoading) {
             viewModel.loadMoreSeries()
         }
     }
 
-    // Generar recomendaciones cuando se cargan las series
     LaunchedEffect(uiState.series) {
         if (uiState.series.isNotEmpty() && !uiState.isLoading) {
             recommendationViewModel.generateRecommendations(
@@ -92,7 +87,6 @@ fun SeriesListScreen(
         }
     }
 
-    // AlertDialog para errores
     if (uiState.error != null && !uiState.isLoading) {
         AlertDialog(
             onDismissRequest = { viewModel.clearError() },
@@ -139,7 +133,6 @@ fun SeriesListScreen(
 
     Scaffold(
         topBar = {
-            // TOP APP BAR MEJORADO CON GRADIENTE
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -162,12 +155,10 @@ fun SeriesListScreen(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    // Logo/Título a la izquierda
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        // Icono decorativo
                         Box(
                             modifier = Modifier
                                 .size(40.dp)
@@ -212,7 +203,6 @@ fun SeriesListScreen(
                         }
                     }
 
-                    // Botón de idioma a la derecha
                     IconButton(
                         onClick = onLanguageChange,
                         modifier = Modifier
@@ -259,21 +249,18 @@ fun SeriesListScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            // Estado de carga inicial
             if (uiState.isLoading && uiState.series.isEmpty()) {
                 LoadingItem(
                     modifier = Modifier.align(Alignment.Center),
                     message = stringResource(R.string.loading_series)
                 )
             }
-            // Estado de error (sin series)
             else if (uiState.error != null && uiState.series.isEmpty()) {
                 ListErrorState(
                     message = uiState.error!!,
                     onRetry = { viewModel.loadInitialSeries() }
                 )
             }
-            // Lista de series con recomendaciones
             else {
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
@@ -281,7 +268,6 @@ fun SeriesListScreen(
                     contentPadding = PaddingValues(bottom = 80.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    // SECCIÓN DE RECOMENDACIONES (IA)
                     item {
                         RecommendationSection(
                             recommendations = recommendations,
@@ -292,26 +278,23 @@ fun SeriesListScreen(
                         )
                     }
 
-                    // SECCIÓN DE SERIES POPULARES
                     item {
                         SectionTitle("Series Populares")
                     }
 
-                    // LISTA DE SERIES
+
                     items(uiState.series) { serie ->
                         SeriesCardImproved(serie = serie) {
                             navController.navigate(Routes.SeriesDetail.createRoute(serie.id))
                         }
                     }
 
-                    // Indicador de carga al final para paginación
                     if (uiState.isLoadingMore) {
                         item {
                             LoadingItem(message = stringResource(R.string.load_more_series))
                         }
                     }
 
-                    // Mensaje cuando no hay más series
                     if (!uiState.isLoadingMore && uiState.series.isNotEmpty()) {
                         item {
                             EndOfListMessage(isOffline = uiState.isOffline)
@@ -342,7 +325,6 @@ fun SeriesCardImproved(
         Row(
             modifier = Modifier.padding(12.dp)
         ) {
-            // Póster con borde decorativo
             Card(
                 shape = RoundedCornerShape(12.dp),
                 elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
@@ -361,7 +343,6 @@ fun SeriesCardImproved(
             Column(
                 modifier = Modifier.weight(1f)
             ) {
-                // Título con rating
                 Row(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically,
@@ -376,7 +357,6 @@ fun SeriesCardImproved(
                         modifier = Modifier.weight(1f)
                     )
 
-                    // Rating inline
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(4.dp)
@@ -398,7 +378,7 @@ fun SeriesCardImproved(
 
                 Spacer(modifier = Modifier.height(6.dp))
 
-                // Descripción
+
                 Text(
                     text = serie.overview,
                     style = MaterialTheme.typography.bodyMedium,
@@ -410,11 +390,11 @@ fun SeriesCardImproved(
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                // Información adicional
+
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    // Año de estreno
+
                     if (serie.firstAirDate != null) {
                         Surface(
                             color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.1f),
@@ -430,7 +410,7 @@ fun SeriesCardImproved(
                         }
                     }
 
-                    // Géneros (primer género si existe)
+
                     if (serie.genreIds.isNotEmpty()) {
                         Surface(
                             color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.1f),

@@ -20,7 +20,7 @@ data class SeriesEntity(
     val numberOfEpisodes: Int,
     val status: String,
     val tagline: String?,
-    val genres: List<GenreEntity>, // Referencia a GenreEntity
+    val genres: List<GenreEntity>,
     val createdBy: List<String>?,
     val networks: List<String>?,
     val language: String = "es-ES",
