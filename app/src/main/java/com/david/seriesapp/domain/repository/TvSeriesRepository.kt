@@ -1,4 +1,3 @@
-// En domain/repository/TvSeriesRepository.kt
 package com.david.seriesapp.domain.repository
 
 import com.david.seriesapp.data.remote.SeriesDetailResponse

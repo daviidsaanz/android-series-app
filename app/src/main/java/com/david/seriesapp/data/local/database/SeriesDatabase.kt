@@ -32,7 +32,7 @@ abstract class SeriesDatabase : RoomDatabase() {
                     SeriesDatabase::class.java,
                     "series_database"
                 )
-                    .fallbackToDestructiveMigration() // Para desarrollo, en producción usar migraciones
+                    .fallbackToDestructiveMigration()
                     .build()
                 INSTANCE = instance
                 instance

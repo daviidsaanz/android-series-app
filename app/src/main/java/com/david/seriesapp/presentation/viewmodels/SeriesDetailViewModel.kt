@@ -29,11 +29,9 @@ class SeriesDetailViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.value = SeriesDetailUiState.Loading
             try {
-                // Intenta cargar desde API
                 val response = repository.getSeriesDetail(seriesId)
                 _uiState.value = SeriesDetailUiState.Success(response)
             } catch (e: Exception) {
-                // Si falla, intenta cargar desde cache
                 loadSeriesDetailFromCache(seriesId, e)
             }
         }
@@ -44,8 +42,7 @@ class SeriesDetailViewModel @Inject constructor(
             if (repository is com.david.seriesapp.data.repository.TvSeriesRepositoryImpl) {
                 repository.getCachedSeriesById(seriesId).collect { cachedSeries ->
                     if (cachedSeries != null) {
-                        // Convertir TvSeriesDto a algo que se pueda mostrar en detalle
-                        // Necesitarás crear un mapper o extender TvSeriesDto
+
                         _uiState.value = SeriesDetailUiState.Offline(
                             series = cachedSeries,
                             message = "Modo offline. Mostrando información guardada."

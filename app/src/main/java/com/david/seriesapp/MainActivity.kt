@@ -28,7 +28,6 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Configurar idioma inicial
         setupLanguage()
 
         enableEdgeToEdge()
@@ -45,7 +44,7 @@ class MainActivity : ComponentActivity() {
                         composable(Routes.SeriesList.route) {
                             SeriesListScreen(
                                 navController = navController,
-                                onLanguageChange = { switchLanguage() } // Parámetro añadido
+                                onLanguageChange = { switchLanguage() }
                             )
                         }
 
@@ -68,8 +67,7 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun setupLanguage() {
-        // Opcional: Aquí podrías cargar la preferencia de idioma guardada
-        // Por ahora, usamos el idioma del sistema
+
     }
 
     private fun switchLanguage() {
@@ -77,10 +75,8 @@ class MainActivity : ComponentActivity() {
         val newLocale: Locale
 
         if (currentLocale.language == "en") {
-            // Cambiar a español
             newLocale = Locale("es")
         } else {
-            // Cambiar a inglés
             newLocale = Locale.ENGLISH
         }
 
@@ -90,12 +86,10 @@ class MainActivity : ComponentActivity() {
 
         resources.updateConfiguration(config, resources.displayMetrics)
 
-        // Reiniciar la actividad para aplicar los cambios
         recreate()
     }
 }
 
-// Función de extensión para facilitar el cambio de idioma
 fun Context.switchAppLanguage(): Context {
     val currentLocale = resources.configuration.locale
     val newLocale = if (currentLocale.language == "en") Locale("es") else Locale.ENGLISH

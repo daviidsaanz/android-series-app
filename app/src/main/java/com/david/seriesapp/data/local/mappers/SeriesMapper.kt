@@ -5,7 +5,6 @@ import com.david.seriesapp.data.remote.SeriesDetailResponse
 import com.david.seriesapp.data.remote.TvSeriesDto
 import com.david.seriesapp.data.local.entities.GenreEntity
 
-// QUITA 'object SeriesMapper' - solo funciones de extensión
 fun TvSeriesDto.toSeriesEntity(page: Int = 1, language: String = "es-ES"): SeriesEntity {
     return SeriesEntity(
         id = id,
