@@ -24,7 +24,6 @@ fun RatingBar(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(4.dp)
     ) {
-        // Estrellas llenas
         repeat((rating / 2).toInt()) {
             Icon(
                 imageVector = Icons.Filled.Star,
@@ -34,7 +33,6 @@ fun RatingBar(
             )
         }
 
-        // Media estrella si corresponde
         if ((rating / 2) - (rating / 2).toInt() >= 0.5) {
             Icon(
                 imageVector = Icons.Outlined.StarOutline,
@@ -44,7 +42,6 @@ fun RatingBar(
             )
         }
 
-        // Estrellas vacías
         repeat(maxRating / 2 - ((rating / 2).toInt() + if ((rating / 2) - (rating / 2).toInt() >= 0.5) 1 else 0)) {
             Icon(
                 imageVector = Icons.Outlined.StarOutline,

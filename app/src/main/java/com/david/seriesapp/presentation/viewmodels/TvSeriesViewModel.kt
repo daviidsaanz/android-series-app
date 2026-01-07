@@ -103,7 +103,7 @@ class TvSeriesViewModel @Inject constructor(
         }
     }
 
-    // ✅ MÉTODO QUE FALTABA
+
     fun checkConnectionAndRefresh() {
         viewModelScope.launch {
             val isConnected = connectivityManager.checkConnection()
